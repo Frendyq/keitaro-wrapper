@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>New campaign</h2>
+  <p class="hint">Creates a campaign with two flows: the first one sends everybody from the country to Google,
+  the second one sends everybody else to the offer.</p>
+  <form id="create-form" class="form">
+    <label>Name
+      <input name="name" value="{{ prefix }}" required>
+    </label>
+    <label>Country code
+      <input name="geo" maxlength="2" placeholder="KZ" required>
+    </label>
+    <label>Offer ID
+      <input name="offer_id" type="number" min="1" required>
+    </label>
+    <button type="submit" class="btn primary">Create campaign</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Campaigns</h2>
+  <table class="table" id="campaigns">
+    <thead><tr><th>Name</th><th>Keitaro ID</th><th>Country</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/index.js"></script>
+{% endblock %}

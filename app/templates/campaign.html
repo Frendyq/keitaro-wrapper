@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }}{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="/">Campaigns</a> / <span>{{ campaign.name }}</span></nav>
+<div class="toolbar">
+  <button id="fetch" class="btn">Fetch streams from KT</button>
+  <span class="hint">Keitaro ID {{ campaign.kt_id }}</span>
+</div>
+<div id="streams" data-campaign="{{ campaign.id }}"></div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/campaign.js"></script>
+{% endblock %}

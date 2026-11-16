@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Keitaro wrapper{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a href="/" class="brand">Keitaro wrapper</a>
+  </header>
+  <main class="page">
+    <div id="message" class="message" hidden></div>
+    {% block content %}{% endblock %}
+  </main>
+  <script src="/static/common.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
