@@ -19,6 +19,17 @@
 </section>
 
 <section class="card">
+  <h2>Existing campaign</h2>
+  <p class="hint">Take a campaign that already exists in Keitaro under the editor.</p>
+  <form id="import-form" class="form">
+    <label>Keitaro campaign ID
+      <input name="kt_id" type="number" min="1" required>
+    </label>
+    <button type="submit" class="btn">Import</button>
+  </form>
+</section>
+
+<section class="card">
   <h2>Campaigns</h2>
   <table class="table" id="campaigns">
     <thead><tr><th>Name</th><th>Keitaro ID</th><th>Country</th><th></th></tr></thead>

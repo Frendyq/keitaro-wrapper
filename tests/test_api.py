@@ -74,3 +74,18 @@ def test_pages_render(client, db, kt):
     assert client.get("/").status_code == 200
     assert client.get(f"/campaigns/{campaign.id}").status_code == 200
     assert client.get("/campaigns/9999").status_code == 404
+
+
+def test_import_campaign_through_the_api(client, kt):
+    remote = kt.create_campaign({"name": "made_in_keitaro"})
+    offers = kt.create_stream({"campaign_id": remote["id"], "name": "Offers", "position": 1, "schema": "landings"})
+    kt.set_offers(offers["id"], {1: 100})
+
+    response = client.post("/api/campaigns/import", json={"kt_id": remote["id"]})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "made_in_keitaro"
+    assert body["streams"][0]["offers"][0]["share"] == 100
+
+    missing = client.post("/api/campaigns/import", json={"kt_id": 999999})
+    assert missing.status_code == 400

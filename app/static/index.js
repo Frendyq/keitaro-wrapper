@@ -24,4 +24,15 @@ $("#create-form").on("submit", function (event) {
   });
 });
 
+$("#import-form").on("submit", function (event) {
+  event.preventDefault();
+  var form = this;
+  var button = $(form).find("button").prop("disabled", true);
+  api("POST", "/api/campaigns/import", { kt_id: Number(form.kt_id.value) }).done(function (campaign) {
+    window.location.href = "/campaigns/" + campaign.id;
+  }).always(function () {
+    button.prop("disabled", false);
+  });
+});
+
 loadCampaigns();

@@ -135,6 +135,16 @@ def list_campaigns(db: Session = Depends(get_db)):
     return [{"id": c.id, "kt_id": c.kt_id, "name": c.name, "geo": c.geo} for c in campaigns]
 
 
+class CampaignImport(BaseModel):
+    kt_id: int = Field(gt=0)
+
+
+@app.post("/api/campaigns/import")
+def import_campaign(body: CampaignImport, db: Session = Depends(get_db), kt: KeitaroClient = Depends(get_keitaro)):
+    campaign = editor.import_campaign(db, kt, body.kt_id)
+    return campaign_to_dict(campaign)
+
+
 @app.post("/api/campaigns", status_code=201)
 def create_campaign(
     body: CampaignCreate,

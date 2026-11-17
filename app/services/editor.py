@@ -6,6 +6,7 @@ Offers removed from a stream are never deleted locally, they stay in the stream 
 "removed" and can be brought back.
 """
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.keitaro import KeitaroClient, KeitaroError
@@ -93,6 +94,25 @@ def sync_campaign_streams(db: Session, kt: KeitaroClient, campaign: Campaign) ->
         if stream.kt_id not in remote_ids:
             db.delete(stream)
     db.flush()
+
+
+def import_campaign(db: Session, kt: KeitaroClient, kt_id: int) -> Campaign:
+    """Take an existing Keitaro campaign under the editor. Importing it twice returns the same campaign."""
+    existing = db.scalar(select(Campaign).where(Campaign.kt_id == kt_id))
+    if existing is not None:
+        return existing
+    try:
+        remote = kt.get_campaign(kt_id)
+    except KeitaroError as error:
+        if error.status_code == 404:
+            raise EditorError(f"Campaign {kt_id} was not found in Keitaro") from error
+        raise
+    campaign = Campaign(kt_id=kt_id, name=str(remote.get("name", "")), alias=remote.get("alias"))
+    db.add(campaign)
+    db.flush()
+    sync_campaign_streams(db, kt, campaign)
+    db.commit()
+    return campaign
 
 
 def _require_offer_stream(stream: Stream) -> None:

@@ -47,6 +47,8 @@ class FakeKeitaro(KeitaroClient):
         return campaign
 
     def get_campaign(self, campaign_id):
+        if campaign_id not in self.campaigns:
+            raise KeitaroError("not found", 404)
         return self.campaigns[campaign_id]
 
     def list_streams(self, campaign_id):

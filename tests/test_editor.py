@@ -176,3 +176,30 @@ def test_streams_without_offers_cannot_be_edited(db, kt):
     plain = next(s for s in campaign.streams if not s.has_offers)
     with pytest.raises(EditorError):
         editor.add_offer(db, kt, plain, 1)
+
+
+# Importing an existing campaign
+
+
+def test_import_existing_campaign(db, kt):
+    remote = kt.create_campaign({"name": "made_in_keitaro", "alias": "abc123"})
+    kt.create_stream({"campaign_id": remote["id"], "name": "Google", "position": 1, "schema": "redirect"})
+    offers = kt.create_stream({"campaign_id": remote["id"], "name": "Offers", "position": 2, "schema": "landings"})
+    kt.set_offers(offers["id"], {1: 50, 2: 50})
+
+    campaign = editor.import_campaign(db, kt, remote["id"])
+
+    assert campaign.name == "made_in_keitaro" and campaign.alias == "abc123"
+    assert [s.has_offers for s in campaign.streams] == [False, True]
+    assert {o.kt_offer_id: o.share for o in offers_stream(campaign).active_offers} == {1: 50, 2: 50}
+
+
+def test_import_twice_gives_the_same_campaign(db, kt):
+    remote = kt.create_campaign({"name": "made_in_keitaro"})
+    first = editor.import_campaign(db, kt, remote["id"])
+    assert editor.import_campaign(db, kt, remote["id"]).id == first.id
+
+
+def test_import_unknown_campaign_fails(db, kt):
+    with pytest.raises(EditorError):
+        editor.import_campaign(db, kt, 999999)
