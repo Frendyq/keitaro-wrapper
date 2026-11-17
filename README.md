@@ -55,7 +55,7 @@ The editor works with any campaign of the account: create one here, or import an
 
 - **Fetch streams from KT** loads the streams from Keitaro. Only streams that contain offers are editable. Other streams (a redirect, for example) are stored without any details. Unpublished local changes are kept. An offer that was deleted in Keitaro does not disappear here, it becomes grey and is marked "removed".
 - **Add.** Search an offer by ID or name and add it. The weights are recalculated at once, four offers get 25% each. Nothing is sent to Keitaro yet.
-- **Remove.** The offer turns grey and its weight becomes 0%. After publishing it is gone from Keitaro but stays here, so it can be brought back with **Bring back**.
+- **Remove.** The offer turns grey and its weight becomes 0%. After publishing it is gone from Keitaro but stays here, so it can be brought back with **Bring back**. An offer that was added here and not pushed yet is simply dropped, there is nothing to bring back.
 - **Pin.** A pinned weight is kept by all later changes. The rest of the percents is split evenly between the other offers. Weights are whole numbers and always add up to 100%, the remainder goes to the last offers (33, 33, 34).
 - **Push to KT** sends the offers of the stream with their weights to Keitaro.
 - **Cancel** drops everything that was not pushed: offers that were never in Keitaro are deleted, removed offers come back to their published weights.

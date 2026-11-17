@@ -44,6 +44,18 @@ def test_edit_flow(client, db, kt):
     assert cancelled["offers"][0]["status"] == "removed"
 
 
+def test_removing_an_unpublished_offer_through_the_api(client, db, kt):
+    stream = offers_stream(make_campaign(db, kt))
+    added = client.post(f"/api/streams/{stream.id}/offers", json={"offer_id": 4}).json()
+    new_id = next(o["id"] for o in added["offers"] if o["offer_id"] == 4)
+
+    body = client.delete(f"/api/streams/{stream.id}/offers/{new_id}").json()
+
+    assert [o["offer_id"] for o in body["offers"]] == [1, 2, 3]
+    assert [o["share"] for o in body["offers"]] == [33, 33, 34]
+    assert body["dirty"] is False
+
+
 def test_pin_endpoint(client, db, kt):
     stream = offers_stream(make_campaign(db, kt, {1: 25, 2: 25, 3: 25, 4: 25}))
     first = stream.offers[0].id

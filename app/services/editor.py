@@ -153,15 +153,26 @@ def add_offer(db: Session, kt: KeitaroClient, stream: Stream, offer_id: int) -> 
     return row
 
 
-def remove_offer(db: Session, offer: StreamOffer) -> None:
+def remove_offer(db: Session, offer: StreamOffer) -> Stream:
+    """Remove an offer from its stream and return the stream.
+
+    An offer that has been in Keitaro stays in the stream as "removed" so it can be brought back.
+    An offer that was added here and never published has nothing to bring back, so it is dropped.
+    """
     if offer.status != ACTIVE:
         raise EditorError("The offer is already removed")
-    offer.status = REMOVED
-    offer.share = 0
-    offer.pinned = False
+    stream = offer.stream
+    if offer.published:
+        offer.status = REMOVED
+        offer.share = 0
+        offer.pinned = False
+    else:
+        stream.offers.remove(offer)
+        db.delete(offer)
     db.flush()
-    _rebalance(offer.stream)
+    _rebalance(stream)
     db.commit()
+    return stream
 
 
 def restore_offer(db: Session, offer: StreamOffer) -> None:

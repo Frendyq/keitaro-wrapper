@@ -208,9 +208,9 @@ def add_offer(
 @app.delete("/api/streams/{stream_id}/offers/{offer_id}")
 def remove_offer(stream_id: int, offer_id: int, db: Session = Depends(get_db)):
     offer = _offer(db, stream_id, offer_id)
-    editor.remove_offer(db, offer)
-    db.refresh(offer.stream)
-    return stream_to_dict(offer.stream, {})
+    stream = editor.remove_offer(db, offer)
+    db.refresh(stream)
+    return stream_to_dict(stream, {})
 
 
 @app.post("/api/streams/{stream_id}/offers/{offer_id}/restore")

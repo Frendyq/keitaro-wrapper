@@ -84,6 +84,31 @@ def test_remove_keeps_the_offer_as_removed(db, kt):
     assert stream.is_dirty
 
 
+def test_removing_an_unpublished_offer_drops_it(db, kt):
+    stream = offers_stream(make_campaign(db, kt))
+    added = editor.add_offer(db, kt, stream, 4)
+    assert stream.is_dirty
+
+    editor.remove_offer(db, added)
+
+    # Nothing to bring back: the offer is gone and the stream is clean again.
+    assert share_map(stream) == {1: (ACTIVE, 33), 2: (ACTIVE, 33), 3: (ACTIVE, 34)}
+    assert not stream.is_dirty
+
+
+def test_removing_a_brought_back_offer_keeps_it_as_removed(db, kt):
+    stream = offers_stream(make_campaign(db, kt))
+    target = stream.offers[0]
+    editor.remove_offer(db, target)
+    editor.push_stream(db, kt, stream)
+    editor.restore_offer(db, target)
+
+    editor.remove_offer(db, target)
+
+    # It has been in Keitaro before, so it stays and can be brought back again.
+    assert target in stream.offers and target.status == REMOVED
+
+
 def test_removed_offer_disappears_from_keitaro_but_stays_locally(db, kt):
     stream = offers_stream(make_campaign(db, kt))
     editor.remove_offer(db, stream.offers[0])
