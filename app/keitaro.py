@@ -1,5 +1,6 @@
 """Thin client for the Keitaro admin API (v1)."""
 
+import time
 from typing import Any
 
 import httpx
@@ -14,8 +15,15 @@ class KeitaroError(RuntimeError):
 
 
 class KeitaroClient:
-    def __init__(self, settings: Settings | None = None, transport: httpx.BaseTransport | None = None):
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        transport: httpx.BaseTransport | None = None,
+        offers_ttl: float = 60.0,
+    ):
         settings = settings or get_settings()
+        self._offers_ttl = offers_ttl
+        self._offers_cache: tuple[float, list[dict]] | None = None
         self._http = httpx.Client(
             base_url=settings.keitaro_url.rstrip("/") + "/admin_api/v1",
             headers={"Api-Key": settings.keitaro_api_key, "Accept": "application/json"},
@@ -49,7 +57,13 @@ class KeitaroClient:
         return self._request("GET", "/traffic_sources")
 
     def list_offers(self) -> list[dict]:
-        return self._request("GET", "/offers")
+        """All offers. The list is big and rarely changes, so it is cached for a short time."""
+        now = time.monotonic()
+        if self._offers_cache and now - self._offers_cache[0] < self._offers_ttl:
+            return self._offers_cache[1]
+        offers = self._request("GET", "/offers")
+        self._offers_cache = (now, offers)
+        return offers
 
     def get_offer(self, offer_id: int) -> dict:
         return self._request("GET", f"/offers/{offer_id}")
