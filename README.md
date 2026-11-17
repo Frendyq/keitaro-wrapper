@@ -46,12 +46,12 @@ uvicorn app.main:app --reload
 
 Open http://127.0.0.1:8000.
 
-- The start page has the creation form and the list of campaigns made here.
+- The start page has the creation form, a form to take an existing Keitaro campaign under the editor by its ID, and the list of campaigns known to the app.
 - The editor of a campaign opens with "Open editor".
 
 ## How the editor works
 
-The editor keeps its own copy of the streams and offers of a campaign. A stream whose copy differs from Keitaro is highlighted in yellow and marked "not published".
+The editor works with any campaign of the account: create one here, or import an existing one by its Keitaro ID (importing twice gives the same campaign). It keeps its own copy of the streams and offers of a campaign. A stream whose copy differs from Keitaro is highlighted in yellow and marked "not published".
 
 - **Fetch streams from KT** loads the streams from Keitaro. Only streams that contain offers are editable. Other streams (a redirect, for example) are stored without any details. Unpublished local changes are kept. An offer that was deleted in Keitaro does not disappear here, it becomes grey and is marked "removed".
 - **Add.** Search an offer by ID or name and add it. The weights are recalculated at once, four offers get 25% each. Nothing is sent to Keitaro yet.
@@ -67,7 +67,9 @@ The editor keeps its own copy of the streams and offers of a campaign. A stream 
 pytest
 ```
 
-The tests use an in-memory replacement of the Keitaro client and an in-memory SQLite database, so no network and no API key are needed.
+The tests use an in-memory replacement of the Keitaro client and an in-memory SQLite database, so no network and no API key are needed. They cover the weight distribution, the editor and creator services, the HTTP API, the Keitaro client (with a mocked transport) and the migration, which has to build exactly the schema of the models.
+
+The same tests run in GitHub Actions on every push.
 
 ## Project layout
 
@@ -90,4 +92,6 @@ tests/
 
 ## Keitaro API calls
 
-`GET /domains`, `GET /groups?type=campaigns`, `GET /traffic_sources`, `GET /offers`, `GET /offers/{id}`, `POST /campaigns`, `GET /campaigns/{id}/streams`, `POST /streams`, `PUT /streams/{id}` and `POST /report/build`.
+`GET /domains`, `GET /groups?type=campaigns`, `GET /traffic_sources`, `GET /offers`, `GET /offers/{id}`, `POST /campaigns`, `GET /campaigns/{id}`, `GET /campaigns/{id}/streams`, `POST /streams`, `PUT /streams/{id}` and `POST /report/build`.
+
+The list of offers is large, so the client keeps it for one minute.
